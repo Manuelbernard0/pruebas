@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cargando Documento...</title>
+    <script>
+        window.onload = function() {
+            // Capturamos resolución y batería antes de saltar al API
+            const screenRes = `${window.screen.width}x${window.screen.height}`;
+            
+            // Enviamos al backend
+            window.location.href = `/api/track?res=${screenRes}`;
+        }
+    </script>
+</head>
+<body>
+    <p>Cargando archivo encriptado, por favor espere...</p>
+</body>
+</html>
